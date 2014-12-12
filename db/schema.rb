@@ -11,13 +11,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141210070831) do
+ActiveRecord::Schema.define(version: 20141212204648) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "hstore"
 
-  create_table "builds", force: true do |t|
+  create_table "builds", force: :cascade do |t|
     t.text     "violations_archive"
     t.integer  "repo_id"
     t.datetime "created_at",          null: false
@@ -30,7 +30,7 @@ ActiveRecord::Schema.define(version: 20141210070831) do
   add_index "builds", ["repo_id"], name: "index_builds_on_repo_id", using: :btree
   add_index "builds", ["uuid"], name: "index_builds_on_uuid", unique: true, using: :btree
 
-  create_table "memberships", force: true do |t|
+  create_table "memberships", force: :cascade do |t|
     t.integer  "user_id",    null: false
     t.integer  "repo_id",    null: false
     t.datetime "created_at"
@@ -39,7 +39,7 @@ ActiveRecord::Schema.define(version: 20141210070831) do
 
   add_index "memberships", ["repo_id", "user_id"], name: "index_memberships_on_repo_id_and_user_id", using: :btree
 
-  create_table "owners", force: true do |t|
+  create_table "owners", force: :cascade do |t|
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
     t.integer  "github_id",   null: false
@@ -49,7 +49,7 @@ ActiveRecord::Schema.define(version: 20141210070831) do
   add_index "owners", ["github_id"], name: "index_owners_on_github_id", unique: true, using: :btree
   add_index "owners", ["github_name"], name: "index_owners_on_github_name", unique: true, using: :btree
 
-  create_table "repos", force: true do |t|
+  create_table "repos", force: :cascade do |t|
     t.integer  "github_id",                        null: false
     t.boolean  "active",           default: false, null: false
     t.integer  "hook_id"
@@ -58,23 +58,23 @@ ActiveRecord::Schema.define(version: 20141210070831) do
     t.datetime "updated_at"
     t.boolean  "private"
     t.boolean  "in_organization"
-    t.boolean  "enabled",          default: false, null: false
   end
 
-  add_index "repos", ["enabled"], name: "index_repos_on_enabled", using: :btree
+  add_index "repos", ["active"], name: "index_repos_on_active", using: :btree
+  add_index "repos", ["github_id"], name: "index_repos_on_github_id", using: :btree
 
-  create_table "style_guide_configs", force: true do |t|
+  create_table "style_guide_configs", force: :cascade do |t|
     t.string   "name",       null: false
     t.boolean  "enabled",    null: false
     t.integer  "owner_id",   null: false
-    t.hstore   "rules"
+    t.json     "rules"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   add_index "style_guide_configs", ["owner_id", "name"], name: "index_style_guide_configs_on_owner_id_and_name", unique: true, using: :btree
 
-  create_table "subscriptions", force: true do |t|
+  create_table "subscriptions", force: :cascade do |t|
     t.datetime "created_at",                                                   null: false
     t.datetime "updated_at",                                                   null: false
     t.integer  "user_id",                                                      null: false
@@ -87,7 +87,7 @@ ActiveRecord::Schema.define(version: 20141210070831) do
   add_index "subscriptions", ["repo_id"], name: "index_subscriptions_on_repo_id", using: :btree
   add_index "subscriptions", ["user_id"], name: "index_subscriptions_on_user_id", using: :btree
 
-  create_table "users", force: true do |t|
+  create_table "users", force: :cascade do |t|
     t.datetime "created_at",                         null: false
     t.datetime "updated_at",                         null: false
     t.string   "github_username",                    null: false
@@ -99,7 +99,7 @@ ActiveRecord::Schema.define(version: 20141210070831) do
 
   add_index "users", ["remember_token"], name: "index_users_on_remember_token", using: :btree
 
-  create_table "violations", force: true do |t|
+  create_table "violations", force: :cascade do |t|
     t.datetime "created_at",                  null: false
     t.datetime "updated_at",                  null: false
     t.integer  "build_id",                    null: false
