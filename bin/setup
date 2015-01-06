@@ -25,3 +25,10 @@ fi
 if ! grep -qs 'port' .foreman; then
   printf 'port: 5000\n' >> .foreman
 fi
+
+# Stripe credentials
+if ! grep -qs 'STRIPE' .env; then
+  heroku config --app hound-staging | grep "STRIPE" > .env
+  sed -i '' 's/\:/=/' .env
+  sed -i '' 's/ //g' .env
+fi
