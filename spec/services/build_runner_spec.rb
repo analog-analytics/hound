@@ -44,6 +44,29 @@ describe BuildRunner, '#run' do
         with(style_checker.violations)
     end
 
+    it "comments a maximum number of times" do
+      max_comments = ENV["MAX_COMMENTS"].to_i
+      build_runner = make_build_runner
+      stubbed_commenter
+      violations = (max_comments + 5).times.map do |i|
+        build(:violation,
+              patch_position: i,
+              line_number: i,
+              messages: ["error #{i}"],
+        )
+      end
+      stubbed_style_checker(violations: violations)
+      commenter = Commenter.new(stubbed_pull_request)
+      allow(Commenter).to receive(:new).and_return(commenter)
+      stubbed_github_api
+
+      build_runner.run
+
+      expect(commenter).to have_received(:comment_on_violations) do |arg|
+        expect(arg.size).to be(max_comments)
+      end
+    end
+
     it 'initializes StyleChecker with modified files and config' do
       build_runner = make_build_runner
       pull_request = stubbed_pull_request
@@ -139,7 +162,10 @@ describe BuildRunner, '#run' do
   end
 
   def stubbed_style_checker_with_violations
-    violations = [build(:violation)]
+    stubbed_style_checker(violations: [build(:violation)])
+  end
+
+  def stubbed_style_checker(violations:)
     style_checker = double(:style_checker, violations: violations)
     allow(StyleChecker).to receive(:new).and_return(style_checker)
 
